@@ -6,9 +6,9 @@ from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
 from alembic import context
-
 from app.config import get_settings
 from app.database import Base
+from app.models.user import User
 
 # Alembic Config object
 config = context.config
@@ -23,6 +23,7 @@ target_metadata = Base.metadata
 # Get database URL from settings
 settings = get_settings()
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+print("-------->", settings.DATABASE_URL)
 
 
 def run_migrations_offline():
