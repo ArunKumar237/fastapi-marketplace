@@ -4,22 +4,13 @@ from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import get_db  # adjust if needed
+from app.database import get_db
+from app.exceptions import UnauthorizedException  # ← use the real one
 from app.models.user import User
 from app.repositories.user import UserRepository
 from app.services.auth import decode_token
 
-# OAuth2 scheme (extracts Bearer token from header)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/v1/auth/login")
-
-
-class UnauthorizedException(Exception):
-    pass
-
-
-# =====================================================
-# GET CURRENT USER DEPENDENCY
-# =====================================================
 
 
 async def get_current_user(
@@ -27,29 +18,39 @@ async def get_current_user(
     db: AsyncSession = Depends(get_db),
 ) -> User:
 
-    # 1 Decode token
     payload = decode_token(token)
     if not payload:
-        raise UnauthorizedException("Invalid or expired token")
+        raise UnauthorizedException(
+            detail="Invalid or expired token",
+            error_code="INVALID_TOKEN",
+        )
 
-    # 2 Ensure token type is access
     if payload.get("type") != "access":
-        raise UnauthorizedException("Invalid token type")
+        raise UnauthorizedException(
+            detail="Invalid token type",
+            error_code="INVALID_TOKEN_TYPE",
+        )
 
-    # 3 Extract user ID
     user_id = payload.get("sub")
     if not user_id:
-        raise UnauthorizedException("Invalid token payload")
+        raise UnauthorizedException(
+            detail="Invalid token payload",
+            error_code="INVALID_TOKEN_PAYLOAD",
+        )
 
-    # 4 Load user from DB
     user_repo = UserRepository(db)
     user = await user_repo.get_by_id(user_id)
 
     if not user:
-        raise UnauthorizedException("User not found")
+        raise UnauthorizedException(
+            detail="User not found",
+            error_code="USER_NOT_FOUND",
+        )
 
-    # 5 Check active
     if not user.is_active:
-        raise UnauthorizedException("Inactive account")
+        raise UnauthorizedException(
+            detail="Inactive account",
+            error_code="INACTIVE_ACCOUNT",
+        )
 
     return user

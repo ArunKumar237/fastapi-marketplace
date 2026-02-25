@@ -35,3 +35,14 @@ class UserRepository:
         await self.db.refresh(user)
 
         return user
+
+    async def update(self, user: User, data: dict) -> User:
+        """
+        Apply a dict of changes to a User instance, commit, and return
+        the refreshed object.
+        """
+        for field, value in data.items():
+            setattr(user, field, value)
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
