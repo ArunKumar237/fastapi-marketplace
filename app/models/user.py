@@ -1,9 +1,13 @@
 import enum
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Boolean, Enum, String
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import BaseModel
+
+if TYPE_CHECKING:
+    from .store import Store
 
 
 class UserRole(str, enum.Enum):
@@ -25,3 +29,8 @@ class User(BaseModel):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    store: Mapped["Store | None"] = relationship(
+        "Store",
+        back_populates="owner",
+        uselist=False,
+    )

@@ -7,6 +7,7 @@ from app.database import engine
 from app.exception_handler import register_exception_handlers
 from app.routers.auth import router as auth_router
 from app.routers.health import router as health_router
+from app.routers.stores import router as stores_router
 
 settings = get_settings()
 
@@ -39,3 +40,4 @@ register_exception_handlers(app)
 # Include routers
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(auth_router)
+app.include_router(stores_router)
