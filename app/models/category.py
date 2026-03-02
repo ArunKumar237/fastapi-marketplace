@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 import sqlalchemy as sa
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import BaseModel
+
+if TYPE_CHECKING:
+    from .product import Product
 
 
 class Category(BaseModel):
@@ -16,3 +21,7 @@ class Category(BaseModel):
     )
     description: Mapped[str | None] = mapped_column(sa.String(255), nullable=True)
     is_active: Mapped[bool] = mapped_column(sa.Boolean, default=True, nullable=False)
+    products: Mapped[list["Product"]] = relationship(
+        "Product",
+        back_populates="category",
+    )
