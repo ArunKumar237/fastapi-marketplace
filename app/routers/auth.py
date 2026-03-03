@@ -7,16 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import get_db
 from app.dependencies.auth import get_current_user
-from app.dependencies.roles import (
-    require_admin,
-    require_vendor,
-    require_vendor_or_admin,
-)
-from app.exceptions import (
-    BadRequestException,
-    ForbiddenException,
-    UnauthorizedException,
-)
+from app.exceptions import BadRequestException
 from app.models.user import User
 from app.repositories.user import UserRepository
 from app.schemas.user import (
@@ -139,31 +130,3 @@ async def update_me(
     user_repo = UserRepository(db)
     updated_user = await user_repo.update(current_user, update_data)
     return updated_user
-
-
-# =====================================================
-# TEMPORARY TEST ROUTES — verify role enforcement
-# Remove these once real admin/vendor endpoints exist
-# =====================================================
-@router.get("/test/admin-only", response_model=UserResponse)
-async def test_admin_only(
-    current_user: User = Depends(require_admin),
-):
-    """Only accessible with an admin token."""
-    return current_user
-
-
-@router.get("/test/vendor-only", response_model=UserResponse)
-async def test_vendor_only(
-    current_user: User = Depends(require_vendor),
-):
-    """Only accessible with a vendor token."""
-    return current_user
-
-
-@router.get("/test/staff-only", response_model=UserResponse)
-async def test_staff_only(
-    current_user: User = Depends(require_vendor_or_admin),
-):
-    """Accessible with either vendor or admin token."""
-    return current_user
