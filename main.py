@@ -8,6 +8,7 @@ from app.config import get_settings
 from app.database import engine
 from app.exception_handler import register_exception_handlers
 from app.routers.auth import router as auth_router
+from app.routers.cart import router as cart_router
 from app.routers.categories import router as categories_router
 from app.routers.health import router as health_router
 from app.routers.product_images import router as product_images_router
@@ -51,3 +52,4 @@ app.include_router(stores_router)
 app.include_router(categories_router)
 app.include_router(products_router)
 app.include_router(product_images_router)
+app.include_router(cart_router)

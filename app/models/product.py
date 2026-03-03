@@ -8,6 +8,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import BaseModel
 
 if TYPE_CHECKING:
+    from .cart_item import CartItem
     from .category import Category
     from .product_image import ProductImage
     from .store import Store
@@ -43,4 +44,9 @@ class Product(BaseModel):
         back_populates="product",
         cascade="all, delete-orphan",
         order_by="ProductImage.sort_order",
+    )
+    cart_items: Mapped[list["CartItem"]] = relationship(
+        "CartItem",
+        back_populates="product",
+        cascade="all, delete-orphan",
     )

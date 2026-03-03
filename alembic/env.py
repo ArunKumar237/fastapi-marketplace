@@ -8,6 +8,7 @@ from sqlalchemy.ext.asyncio import async_engine_from_config
 from alembic import context
 from app.config import get_settings
 from app.database import Base
+from app.models.cart_item import CartItem
 from app.models.category import Category
 from app.models.product import Product
 from app.models.product_image import ProductImage
