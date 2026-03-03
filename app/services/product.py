@@ -6,6 +6,7 @@ from app.models.product import Product
 from app.models.user import User
 from app.repositories.category import CategoryRepository
 from app.repositories.product import ProductRepository
+from app.repositories.review import ReviewRepository
 from app.repositories.store import StoreRepository
 from app.schemas.pagination import PaginatedResponse
 from app.schemas.product import (
@@ -22,12 +23,17 @@ class ProductService:
         product_repo: ProductRepository,
         store_repo: StoreRepository,
         category_repo: CategoryRepository,
+        review_repo: ReviewRepository,
     ):
         self.product_repo = product_repo
         self.store_repo = store_repo
         self.category_repo = category_repo
+        self.review_repo = review_repo
 
-    def _to_product_response(self, product: Product) -> ProductResponse:
+    async def _to_product_response(self, product: Product) -> ProductResponse:
+        average_rating, review_count = await self.review_repo.get_review_aggregates(
+            product.id
+        )
         return ProductResponse(
             id=product.id,
             name=product.name,
@@ -38,11 +44,16 @@ class ProductService:
             store=product.store,
             category=product.category,
             images=product.images,
+            average_rating=average_rating,
+            review_count=review_count,
             created_at=product.created_at,
             updated_at=product.updated_at,
         )
 
-    def _to_product_list_response(self, product: Product) -> ProductListResponse:
+    async def _to_product_list_response(self, product: Product) -> ProductListResponse:
+        average_rating, review_count = await self.review_repo.get_review_aggregates(
+            product.id
+        )
         return ProductListResponse(
             id=product.id,
             name=product.name,
@@ -53,6 +64,8 @@ class ProductService:
             store=product.store,
             category=product.category,
             images=product.images,
+            average_rating=average_rating,
+            review_count=review_count,
             created_at=product.created_at,
             updated_at=product.updated_at,
         )
@@ -93,7 +106,7 @@ class ProductService:
         )
 
         product = await self.product_repo.get_by_id(product.id, include_inactive=True)
-        return self._to_product_response(product)
+        return await self._to_product_response(product)
 
     async def list_products(
         self,
@@ -121,7 +134,7 @@ class ProductService:
             include_inactive=include_inactive,
         )
         return PaginatedResponse[ProductListResponse](
-            items=[self._to_product_list_response(item) for item in items],
+            items=[await self._to_product_list_response(item) for item in items],
             total=total,
             page=page,
             size=size,
@@ -153,7 +166,7 @@ class ProductService:
                     error_code="PRODUCT_NOT_FOUND",
                 )
 
-        return self._to_product_response(product)
+        return await self._to_product_response(product)
 
     async def update_product(
         self,
@@ -186,11 +199,11 @@ class ProductService:
                 )
 
         if not update_data:
-            return self._to_product_response(product)
+            return await self._to_product_response(product)
 
         updated = await self.product_repo.update(product, update_data)
         updated = await self.product_repo.get_by_id(updated.id, include_inactive=True)
-        return self._to_product_response(updated)
+        return await self._to_product_response(updated)
 
     async def delete_product(
         self,

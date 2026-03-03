@@ -49,6 +49,8 @@ class ProductResponse(BaseModel):
     store: StoreInfo
     category: CategoryInfo
     images: list[ProductImageResponse]
+    average_rating: float = 0.0
+    review_count: int = 0
     created_at: datetime
     updated_at: datetime
 
@@ -65,6 +67,8 @@ class ProductListResponse(BaseModel):
     store: StoreInfo
     category: CategoryInfo
     images: list[ProductImageResponse]
+    average_rating: float = 0.0
+    review_count: int = 0
     created_at: datetime
     updated_at: datetime
 

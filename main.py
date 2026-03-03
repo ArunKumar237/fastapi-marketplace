@@ -14,6 +14,7 @@ from app.routers.health import router as health_router
 from app.routers.orders import router as orders_router
 from app.routers.product_images import router as product_images_router
 from app.routers.products import router as products_router
+from app.routers.reviews import router as reviews_router
 from app.routers.stores import router as stores_router
 
 settings = get_settings()
@@ -52,6 +53,7 @@ app.include_router(auth_router)
 app.include_router(stores_router)
 app.include_router(categories_router)
 app.include_router(products_router)
+app.include_router(reviews_router)
 app.include_router(product_images_router)
 app.include_router(cart_router)
 app.include_router(orders_router)

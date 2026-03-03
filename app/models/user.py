@@ -10,6 +10,7 @@ if TYPE_CHECKING:
     from .address import Address
     from .cart_item import CartItem
     from .order import Order
+    from .review import Review
     from .store import Store
 
 
@@ -49,6 +50,11 @@ class User(BaseModel):
     )
     orders: Mapped[list["Order"]] = relationship(
         "Order",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    reviews: Mapped[list["Review"]] = relationship(
+        "Review",
         back_populates="user",
         cascade="all, delete-orphan",
     )

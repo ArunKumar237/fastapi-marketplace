@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .category import Category
     from .order_item import OrderItem
     from .product_image import ProductImage
+    from .review import Review
     from .store import Store
 
 
@@ -54,4 +55,9 @@ class Product(BaseModel):
     order_items: Mapped[list["OrderItem"]] = relationship(
         "OrderItem",
         back_populates="product",
+    )
+    reviews: Mapped[list["Review"]] = relationship(
+        "Review",
+        back_populates="product",
+        cascade="all, delete-orphan",
     )
