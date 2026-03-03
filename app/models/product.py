@@ -10,6 +10,7 @@ from .base import BaseModel
 if TYPE_CHECKING:
     from .cart_item import CartItem
     from .category import Category
+    from .order_item import OrderItem
     from .product_image import ProductImage
     from .store import Store
 
@@ -49,4 +50,8 @@ class Product(BaseModel):
         "CartItem",
         back_populates="product",
         cascade="all, delete-orphan",
+    )
+    order_items: Mapped[list["OrderItem"]] = relationship(
+        "OrderItem",
+        back_populates="product",
     )

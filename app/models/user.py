@@ -7,7 +7,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from .base import BaseModel
 
 if TYPE_CHECKING:
+    from .address import Address
     from .cart_item import CartItem
+    from .order import Order
     from .store import Store
 
 
@@ -37,6 +39,16 @@ class User(BaseModel):
     )
     cart_items: Mapped[list["CartItem"]] = relationship(
         "CartItem",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    addresses: Mapped[list["Address"]] = relationship(
+        "Address",
+        back_populates="user",
+        cascade="all, delete-orphan",
+    )
+    orders: Mapped[list["Order"]] = relationship(
+        "Order",
         back_populates="user",
         cascade="all, delete-orphan",
     )
