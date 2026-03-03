@@ -26,14 +26,18 @@ class ProductRepository:
     ) -> Product | None:
         query = (
             select(Product)
-            .options(joinedload(Product.store), joinedload(Product.category))
+            .options(
+                joinedload(Product.store),
+                joinedload(Product.category),
+                joinedload(Product.images),
+            )
             .where(Product.id == product_id)
         )
         if not include_inactive:
             query = query.where(Product.is_active.is_(True))
 
         result = await self.db.execute(query)
-        return result.scalar_one_or_none()
+        return result.unique().scalar_one_or_none()
 
     async def list(
         self,
@@ -80,7 +84,11 @@ class ProductRepository:
         total_result = await self.db.execute(total_query)
         total = total_result.scalar_one()
 
-        query = select(Product).options(joinedload(Product.store), joinedload(Product.category))
+        query = select(Product).options(
+            joinedload(Product.store),
+            joinedload(Product.category),
+            joinedload(Product.images),
+        )
         if filters:
             query = query.where(*filters)
 
@@ -90,16 +98,14 @@ class ProductRepository:
             "name": Product.name,
         }
         sort_column = sort_fields.get(sort_by, Product.created_at)
-        sort_expr = sort_column.asc() if sort_order.lower() == "asc" else sort_column.desc()
-
-        query = (
-            query.order_by(sort_expr)
-            .offset((page - 1) * size)
-            .limit(size)
+        sort_expr = (
+            sort_column.asc() if sort_order.lower() == "asc" else sort_column.desc()
         )
 
+        query = query.order_by(sort_expr).offset((page - 1) * size).limit(size)
+
         result = await self.db.execute(query)
-        items = list(result.scalars().all())
+        items = list(result.unique().scalars().all())
         return items, total
 
     async def update(self, product: Product, data: dict) -> Product:

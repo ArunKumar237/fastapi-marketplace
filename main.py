@@ -1,6 +1,8 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.database import engine
@@ -8,6 +10,7 @@ from app.exception_handler import register_exception_handlers
 from app.routers.auth import router as auth_router
 from app.routers.categories import router as categories_router
 from app.routers.health import router as health_router
+from app.routers.product_images import router as product_images_router
 from app.routers.products import router as products_router
 from app.routers.stores import router as stores_router
 
@@ -35,6 +38,8 @@ app = FastAPI(
     debug=settings.DEBUG,
     lifespan=lifespan,
 )
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 # Register exception handlers
 register_exception_handlers(app)
@@ -45,3 +50,4 @@ app.include_router(auth_router)
 app.include_router(stores_router)
 app.include_router(categories_router)
 app.include_router(products_router)
+app.include_router(product_images_router)

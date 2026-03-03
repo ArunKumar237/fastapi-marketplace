@@ -4,6 +4,8 @@ from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
+from app.schemas.product_image import ProductImageResponse
+
 
 class ProductCreate(BaseModel):
     name: str = Field(min_length=1, max_length=255)
@@ -46,6 +48,7 @@ class ProductResponse(BaseModel):
     is_active: bool
     store: StoreInfo
     category: CategoryInfo
+    images: list[ProductImageResponse]
     created_at: datetime
     updated_at: datetime
 
@@ -61,6 +64,7 @@ class ProductListResponse(BaseModel):
     is_active: bool
     store: StoreInfo
     category: CategoryInfo
+    images: list[ProductImageResponse]
     created_at: datetime
     updated_at: datetime
 

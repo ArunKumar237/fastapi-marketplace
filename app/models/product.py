@@ -9,6 +9,7 @@ from .base import BaseModel
 
 if TYPE_CHECKING:
     from .category import Category
+    from .product_image import ProductImage
     from .store import Store
 
 
@@ -37,3 +38,9 @@ class Product(BaseModel):
 
     store: Mapped["Store"] = relationship("Store", back_populates="products")
     category: Mapped["Category"] = relationship("Category", back_populates="products")
+    images: Mapped[list["ProductImage"]] = relationship(
+        "ProductImage",
+        back_populates="product",
+        cascade="all, delete-orphan",
+        order_by="ProductImage.sort_order",
+    )

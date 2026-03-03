@@ -8,7 +8,12 @@ from app.repositories.category import CategoryRepository
 from app.repositories.product import ProductRepository
 from app.repositories.store import StoreRepository
 from app.schemas.pagination import PaginatedResponse
-from app.schemas.product import ProductCreate, ProductListResponse, ProductResponse, ProductUpdate
+from app.schemas.product import (
+    ProductCreate,
+    ProductListResponse,
+    ProductResponse,
+    ProductUpdate,
+)
 
 
 class ProductService:
@@ -32,6 +37,7 @@ class ProductService:
             is_active=product.is_active,
             store=product.store,
             category=product.category,
+            images=product.images,
             created_at=product.created_at,
             updated_at=product.updated_at,
         )
@@ -46,6 +52,7 @@ class ProductService:
             is_active=product.is_active,
             store=product.store,
             category=product.category,
+            images=product.images,
             created_at=product.created_at,
             updated_at=product.updated_at,
         )
