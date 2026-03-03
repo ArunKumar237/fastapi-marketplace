@@ -20,8 +20,9 @@ class OrderItemResponse(BaseModel):
 
 class ShippingAddressResponse(BaseModel):
     id: uuid.UUID
-    line1: str | None = None
-    line2: str | None = None
+    label: str | None = None
+    address_line_1: str | None = None
+    address_line_2: str | None = None
     city: str | None = None
     state: str | None = None
     postal_code: str | None = None

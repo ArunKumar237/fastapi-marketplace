@@ -19,12 +19,13 @@ class Address(BaseModel):
         nullable=False,
         index=True,
     )
-    line1: Mapped[str] = mapped_column(sa.String(255), nullable=False)
-    line2: Mapped[str | None] = mapped_column(sa.String(255), nullable=True)
+    label: Mapped[str] = mapped_column(sa.String(50), nullable=False)
+    address_line_1: Mapped[str] = mapped_column(sa.String(255), nullable=False)
+    address_line_2: Mapped[str | None] = mapped_column(sa.String(255), nullable=True)
     city: Mapped[str] = mapped_column(sa.String(100), nullable=False)
     state: Mapped[str] = mapped_column(sa.String(100), nullable=False)
     postal_code: Mapped[str] = mapped_column(sa.String(20), nullable=False)
-    country: Mapped[str] = mapped_column(sa.String(100), nullable=False)
+    country: Mapped[str] = mapped_column(sa.String(50), nullable=False)
     is_default: Mapped[bool] = mapped_column(sa.Boolean, nullable=False, default=False)
 
     user: Mapped["User"] = relationship("User", back_populates="addresses")

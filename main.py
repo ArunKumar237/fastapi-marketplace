@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from app.config import get_settings
 from app.database import engine
 from app.exception_handler import register_exception_handlers
+from app.routers.addresses import router as addresses_router
 from app.routers.auth import router as auth_router
 from app.routers.cart import router as cart_router
 from app.routers.categories import router as categories_router
@@ -56,4 +57,5 @@ app.include_router(products_router)
 app.include_router(reviews_router)
 app.include_router(product_images_router)
 app.include_router(cart_router)
+app.include_router(addresses_router)
 app.include_router(orders_router)
