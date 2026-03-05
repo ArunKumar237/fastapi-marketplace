@@ -52,7 +52,7 @@ from app.database import (  # noqa: E402
     ensure_database_schema,
     get_db,
 )
-from main import app  # noqa: E402
+from app.main import app  # noqa: E402
 
 
 async def _ensure_test_database_exists() -> None:
