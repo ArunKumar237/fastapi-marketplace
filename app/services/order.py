@@ -1,9 +1,10 @@
 import logging
 import random
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
 
+from app.websockets.manager import connection_manager
 from sqlalchemy import delete, select
 
 from app.exceptions import BadRequestException, ForbiddenException, NotFoundException
@@ -343,6 +344,17 @@ class OrderService:
                 order_item.order.user.email,
                 order_item.status,
             )
+        await connection_manager.send_to_user(
+            str(order_item.order.user.id),
+            {
+                "order_id": str(order_item.order.id),
+                "status": order_item.status,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+                "message": (
+                    f"Your order status has been updated to {order_item.status.upper()}"
+                ),
+            },
+        )
         return VendorOrderItemResponse(
             order_item_id=order_item.id,
             order_number=order_item.order.order_number,

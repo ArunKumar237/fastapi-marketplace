@@ -18,6 +18,7 @@ from app.routers.product_images import router as product_images_router
 from app.routers.products import router as products_router
 from app.routers.reviews import router as reviews_router
 from app.routers.stores import router as stores_router
+from app.websockets.orders import router as websocket_orders_router
 
 settings = get_settings()
 logger = logging.getLogger(__name__)
@@ -63,3 +64,4 @@ app.include_router(product_images_router)
 app.include_router(cart_router)
 app.include_router(addresses_router)
 app.include_router(orders_router)
+app.include_router(websocket_orders_router)
