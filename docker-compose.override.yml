@@ -1,0 +1,12 @@
+services:
+  api:
+    environment:
+      UVICORN_RELOAD: "true"
+      DEBUG: "True"
+    volumes:
+      - ./:/app
+    command: ["sh", "/app/scripts/start-api.sh"]
+
+  celery-worker:
+    volumes:
+      - ./:/app
