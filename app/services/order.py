@@ -1,3 +1,4 @@
+import logging
 import random
 import uuid
 from datetime import datetime
@@ -21,6 +22,7 @@ from app.schemas.order import (
     VendorOrderItemResponse,
 )
 from app.schemas.pagination import PaginatedResponse
+from app.tasks.email import send_order_confirmation, send_status_update
 
 VALID_ORDER_STATUSES = {"pending", "confirmed", "shipped", "delivered", "cancelled"}
 VALID_TRANSITIONS = {
@@ -30,6 +32,32 @@ VALID_TRANSITIONS = {
     "delivered": set(),
     "cancelled": set(),
 }
+logger = logging.getLogger(__name__)
+
+
+def log_order_placement_event(
+    order_id: str,
+    user_email: str,
+    timestamp: str,
+    order_details: dict,
+) -> None:
+    message = (
+        f"order_placement_event order_id={order_id} "
+        f"user_email={user_email} timestamp={timestamp} details={order_details}"
+    )
+    logger.info(
+        "background_task_start order_placement order_id=%s user_email=%s timestamp=%s",
+        order_id,
+        user_email,
+        timestamp,
+    )
+    logger.info(message)
+    print(message)
+    logger.info(
+        "background_task_end order_placement order_id=%s user_email=%s",
+        order_id,
+        user_email,
+    )
 
 
 class OrderService:
@@ -160,7 +188,16 @@ class OrderService:
             raise
 
         order = await self.order_repo.get_order_by_id(order.id)
-        return self._to_order_detail_response(order)
+        order_response = self._to_order_detail_response(order)
+        try:
+            send_order_confirmation.delay(str(order_response.id), user.email)
+        except Exception:
+            logger.exception(
+                "Failed to enqueue send_order_confirmation order_id=%s user_email=%s",
+                order_response.id,
+                user.email,
+            )
+        return order_response
 
     async def get_user_orders(
         self,
@@ -293,6 +330,19 @@ class OrderService:
             raise
 
         order_item = await self.order_item_repo.get_order_item_by_id(order_item_id)
+        try:
+            send_status_update.delay(
+                str(order_item.order.id),
+                order_item.order.user.email,
+                order_item.status,
+            )
+        except Exception:
+            logger.exception(
+                "Failed to enqueue send_status_update order_id=%s user_email=%s status=%s",
+                order_item.order.id,
+                order_item.order.user.email,
+                order_item.status,
+            )
         return VendorOrderItemResponse(
             order_item_id=order_item.id,
             order_number=order_item.order.order_number,

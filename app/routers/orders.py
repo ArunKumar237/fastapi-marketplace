@@ -1,6 +1,7 @@
 import uuid
+from datetime import datetime, timezone
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Query, status
 
 from app.dependencies.auth import get_current_user
 from app.dependencies.orders import get_order_service
@@ -14,21 +15,32 @@ from app.schemas.order import (
     VendorOrderItemResponse,
 )
 from app.schemas.pagination import PaginatedResponse
-from app.services.order import OrderService
+from app.services.order import OrderService, log_order_placement_event
 
 router = APIRouter(prefix="/api/v1", tags=["Orders"])
 
 
-@router.post("/orders", response_model=OrderDetailResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/orders", response_model=OrderDetailResponse, status_code=status.HTTP_201_CREATED
+)
 async def place_order(
     payload: OrderCreate,
+    background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
     order_service: OrderService = Depends(get_order_service),
 ):
-    return await order_service.place_order(
+    order_response = await order_service.place_order(
         user=current_user,
         shipping_address_id=payload.shipping_address_id,
     )
+    background_tasks.add_task(
+        log_order_placement_event,
+        order_id=str(order_response.id),
+        user_email=current_user.email,
+        timestamp=datetime.now(timezone.utc).isoformat(),
+        order_details=order_response.model_dump(mode="json"),
+    )
+    return order_response
 
 
 @router.get(

@@ -23,6 +23,28 @@ AsyncSessionLocal = async_sessionmaker(
 # Base class for models
 Base = declarative_base()
 
+
+def _import_all_models() -> None:
+    # Ensure all model metadata is registered before create_all.
+    from app.models import (  # noqa: F401
+        address,
+        cart_item,
+        category,
+        order,
+        order_item,
+        product,
+        product_image,
+        review,
+        store,
+        user,
+    )
+
+
+async def ensure_database_schema() -> None:
+    _import_all_models()
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all, checkfirst=True)
+
 # Dependency for FastAPI
 async def get_db():
     async with AsyncSessionLocal() as session:

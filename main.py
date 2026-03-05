@@ -1,3 +1,4 @@
+import logging
 import os
 from contextlib import asynccontextmanager
 
@@ -5,7 +6,7 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
-from app.database import engine
+from app.database import engine, ensure_database_schema
 from app.exception_handler import register_exception_handlers
 from app.routers.addresses import router as addresses_router
 from app.routers.auth import router as auth_router
@@ -19,6 +20,7 @@ from app.routers.reviews import router as reviews_router
 from app.routers.stores import router as stores_router
 
 settings = get_settings()
+logger = logging.getLogger(__name__)
 
 
 # Lifespan handler (modern replacement for startup/shutdown events)
@@ -26,6 +28,8 @@ settings = get_settings()
 async def lifespan(app: FastAPI):
     # Startup logic
     print("Starting application...")
+    await ensure_database_schema()
+    logger.info("Database schema verified (missing tables created if needed).")
 
     yield
 
