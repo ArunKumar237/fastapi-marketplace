@@ -3,11 +3,13 @@ import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings
 from app.database import engine, ensure_database_schema
 from app.exception_handler import register_exception_handlers
+from app.middleware import RequestIDMiddleware, RequestLoggingMiddleware
 from app.routers.addresses import router as addresses_router
 from app.routers.auth import router as auth_router
 from app.routers.cart import router as cart_router
@@ -44,9 +46,25 @@ app = FastAPI(
     title="My FastAPI Service",
     description="Production-ready FastAPI backend with async SQLAlchemy",
     version="1.0.0",
-    debug=settings.DEBUG,
+    # Keep global 500 responses sanitized even when DEBUG env is true.
+    debug=False,
     lifespan=lifespan,
 )
+
+# Middleware registration order (last added runs first):
+# Add CORS first, then logging, then request ID to keep request ID outermost.
+allowed_origins = settings.ALLOWED_ORIGINS or (["*"] if settings.DEBUG else [])
+allow_credentials = "*" not in allowed_origins
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=allow_credentials,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(RequestIDMiddleware)
+
 os.makedirs("uploads", exist_ok=True)
 app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
