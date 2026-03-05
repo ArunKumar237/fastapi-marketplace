@@ -10,8 +10,11 @@ dependencies = [
     "bcrypt>=5.0.0",
     "celery>=5.5.3",
     "fastapi>=0.131.0",
+    "httpx>=0.28.1",
     "pydantic-settings>=2.13.1",
     "pydantic[email]>=2.12.5",
+    "pytest>=8.4.2",
+    "pytest-asyncio>=1.2.0",
     "python-multipart>=0.0.22",
     "python-dotenv>=1.2.1",
     "python-jose>=3.5.0",
@@ -20,3 +23,9 @@ dependencies = [
     "uvicorn>=0.41.0",
     "websockets>=15.0.1",
 ]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "session"
+asyncio_default_test_loop_scope = "session"
+testpaths = ["tests"]
